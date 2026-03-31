@@ -20,7 +20,7 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/dashboard");
     } catch {
-      setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+      setError("اسم المستخدم أو كلمة المرور غير صحيحة");
     } finally {
       setIsLoading(false);
     }
@@ -51,16 +51,16 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                البريد الإلكتروني
+                اسم المستخدم
               </label>
               <input
                 id="email"
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors text-right"
-                placeholder="admin@gcdc.gov.sa"
+                placeholder="admin"
                 dir="ltr"
               />
             </div>

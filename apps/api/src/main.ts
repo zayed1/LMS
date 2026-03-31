@@ -9,18 +9,18 @@ async function seedAdmin() {
   const logger = new Logger('Seed');
   const prisma = new PrismaClient();
   try {
-    const admin = await prisma.user.findUnique({ where: { email: 'admin@gcdc.gov.sa' } });
+    const admin = await prisma.user.findUnique({ where: { email: 'admin' } });
     if (!admin) {
       await prisma.department.upsert({
         where: { id: 'dept-general' },
         update: {},
         create: { id: 'dept-general', nameAr: 'الإدارة العامة', nameEn: 'General Administration' },
       });
-      const hash = await bcrypt.hash('Admin@123', 12);
+      const hash = await bcrypt.hash('12345', 12);
       await prisma.user.create({
-        data: { email: 'admin@gcdc.gov.sa', password: hash, nameAr: 'مدير النظام', nameEn: 'System Admin', role: 'SUPER_ADMIN', status: 'ACTIVE', departmentId: 'dept-general' },
+        data: { email: 'admin', password: hash, nameAr: 'مدير النظام', nameEn: 'System Admin', role: 'SUPER_ADMIN', status: 'ACTIVE', departmentId: 'dept-general' },
       });
-      logger.log('Admin account created: admin@gcdc.gov.sa');
+      logger.log('Admin account created: admin / 12345');
     }
   } catch (e) {
     logger.warn('Seed skipped (DB may not be ready yet)');

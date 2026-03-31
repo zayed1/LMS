@@ -11,19 +11,15 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 
 export class CreateUserDto {
-  @ApiProperty({ example: 'user@gcdc.gov.sa' })
-  @IsEmail()
+  @ApiProperty({ example: 'admin' })
+  @IsString()
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty({ example: 'SecurePass@123', minLength: 8 })
+  @ApiProperty({ example: '12345', minLength: 4 })
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
-    message:
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-  })
+  @MinLength(4)
   password: string;
 
   @ApiProperty({ example: 'محمد أحمد' })

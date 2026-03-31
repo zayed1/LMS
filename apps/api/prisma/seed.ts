@@ -49,13 +49,13 @@ async function main() {
   console.log(`Created ${departments.length} departments`);
 
   // Create default super admin
-  const hashedPassword = await bcrypt.hash('Admin@123', 12);
+  const hashedPassword = await bcrypt.hash('12345', 12);
 
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@gcdc.gov.sa' },
+    where: { email: 'admin' },
     update: {},
     create: {
-      email: 'admin@gcdc.gov.sa',
+      email: 'admin',
       password: hashedPassword,
       nameAr: 'مدير النظام',
       nameEn: 'System Administrator',
