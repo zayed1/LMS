@@ -119,7 +119,7 @@ export class CoursesService {
   async addModule(dto: CreateModuleDto) {
     const course = await this.findById(dto.courseId);
     const maxSort = course.modules.length > 0
-      ? Math.max(...course.modules.map(m => m.sortOrder)) + 1
+      ? Math.max(...course.modules.map((m: any) => m.sortOrder)) + 1
       : 0;
 
     return this.prisma.courseModule.create({
@@ -149,7 +149,7 @@ export class CoursesService {
     if (!mod) throw new NotFoundException('الوحدة غير موجودة');
 
     const maxSort = mod.lessons.length > 0
-      ? Math.max(...mod.lessons.map(l => l.sortOrder)) + 1
+      ? Math.max(...mod.lessons.map((l: any) => l.sortOrder)) + 1
       : 0;
 
     return this.prisma.lesson.create({
