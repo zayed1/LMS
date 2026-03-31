@@ -1,59 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { execSync } from 'child_process';
-import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
 import { AppModule } from './app.module';
 
-async function runMigrations() {
-  try {
-    console.log('Running database migrations...');
-    execSync('npx prisma db push --skip-generate --accept-data-loss', { stdio: 'inherit' });
-    console.log('Database migrations complete.');
-  } catch (e) {
-    console.warn('Migration warning:', (e as Error).message);
-  }
-}
-
-async function seedDatabase() {
-  const prisma = new PrismaClient();
-  try {
-    const adminExists = await prisma.user.findUnique({ where: { email: 'admin@gcdc.gov.sa' } });
-    if (!adminExists) {
-      console.log('Seeding database...');
-
-      await prisma.department.upsert({
-        where: { id: 'dept-general' },
-        update: {},
-        create: { id: 'dept-general', nameAr: 'الإدارة العامة', nameEn: 'General Administration' },
-      });
-
-      const hashedPassword = await bcrypt.hash('Admin@123', 12);
-      await prisma.user.create({
-        data: {
-          email: 'admin@gcdc.gov.sa',
-          password: hashedPassword,
-          nameAr: 'مدير النظام',
-          nameEn: 'System Administrator',
-          role: 'SUPER_ADMIN',
-          status: 'ACTIVE',
-          departmentId: 'dept-general',
-        },
-      });
-      console.log('Admin account created: admin@gcdc.gov.sa');
-    }
-  } catch (e) {
-    console.warn('Seed warning:', (e as Error).message);
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
 async function bootstrap() {
-  await runMigrations();
-  await seedDatabase();
-
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api');
