@@ -46,7 +46,7 @@ export class AuthService {
     return user;
   }
 
-  generateTokens(user: { id: string; email: string; role: string }) {
+  async generateTokens(user: { id: string; email: string; role: string }) {
     const payload = {
       sub: user.id,
       email: user.email,
@@ -62,15 +62,24 @@ export class AuthService {
       ),
     });
 
+    // Fetch full user data
+    const fullUser = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      select: { id: true, email: true, nameAr: true, nameEn: true, role: true, phone: true, avatar: true },
+    });
+
     return {
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      },
+      user: fullUser,
     };
+  }
+
+  async getProfile(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, nameAr: true, nameEn: true, role: true, phone: true, avatar: true, departmentId: true },
+    });
   }
 
   async refreshTokens(refreshToken: string) {

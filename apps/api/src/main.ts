@@ -1,10 +1,39 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 import { AppModule } from './app.module';
+
+async function seedAdmin() {
+  const logger = new Logger('Seed');
+  const prisma = new PrismaClient();
+  try {
+    const admin = await prisma.user.findUnique({ where: { email: 'admin@gcdc.gov.sa' } });
+    if (!admin) {
+      await prisma.department.upsert({
+        where: { id: 'dept-general' },
+        update: {},
+        create: { id: 'dept-general', nameAr: 'الإدارة العامة', nameEn: 'General Administration' },
+      });
+      const hash = await bcrypt.hash('Admin@123', 12);
+      await prisma.user.create({
+        data: { email: 'admin@gcdc.gov.sa', password: hash, nameAr: 'مدير النظام', nameEn: 'System Admin', role: 'SUPER_ADMIN', status: 'ACTIVE', departmentId: 'dept-general' },
+      });
+      logger.log('Admin account created: admin@gcdc.gov.sa');
+    }
+  } catch (e) {
+    logger.warn('Seed skipped (DB may not be ready yet)');
+  } finally {
+    await prisma.$disconnect();
+  }
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Seed admin after app starts (DB available at runtime)
+  seedAdmin().catch(() => {});
 
   app.setGlobalPrefix('api');
 
