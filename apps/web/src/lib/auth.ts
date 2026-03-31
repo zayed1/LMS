@@ -5,7 +5,10 @@ interface User {
   id: string;
   email: string;
   name: string;
+  nameAr?: string;
+  nameEn?: string;
   role: string;
+  phone?: string;
   avatarUrl?: string;
 }
 

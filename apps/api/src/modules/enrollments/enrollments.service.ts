@@ -148,9 +148,9 @@ export class EnrollmentsService {
 
     return {
       enrollment,
-      modules: modules.map(mod => ({
+      modules: modules.map((mod: any) => ({
         ...mod,
-        lessons: mod.lessons.map(lesson => ({
+        lessons: mod.lessons.map((lesson: any) => ({
           id: lesson.id,
           titleAr: lesson.titleAr,
           titleEn: lesson.titleEn,
