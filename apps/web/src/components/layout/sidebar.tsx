@@ -8,6 +8,8 @@ import {
   Users,
   Building2,
   GraduationCap,
+  BookOpen,
+  Search,
   BarChart3,
   Settings,
   ChevronLeft,
@@ -26,6 +28,8 @@ const navItems: NavItem[] = [
   { label: 'المستخدمين', href: '/users', icon: Users },
   { label: 'الأقسام', href: '/departments', icon: Building2 },
   { label: 'الدورات', href: '/courses', icon: GraduationCap },
+  { label: 'دوراتي', href: '/my-courses', icon: BookOpen },
+  { label: 'كتالوج الدورات', href: '/catalog', icon: Search },
   { label: 'التقارير', href: '/reports', icon: BarChart3 },
   { label: 'الإعدادات', href: '/settings', icon: Settings },
 ];

@@ -38,7 +38,10 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  auditLogs AuditLog[]
+  auditLogs    AuditLog[]
+  enrollments  Enrollment[]
+  coursesTaught Course[]     @relation("InstructorCourses")
+  lessonProgress LessonProgress[]
 
   @@index([email])
   @@index([role])
@@ -62,6 +65,166 @@ model Department {
 
   @@index([parentId])
   @@map("departments")
+}
+
+// ========================
+// Course Management Models
+// ========================
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CourseModality {
+  ONLINE
+  IN_PERSON
+  BLENDED
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  IN_PROGRESS
+  COMPLETED
+  DROPPED
+  FAILED
+}
+
+enum LessonType {
+  VIDEO
+  DOCUMENT
+  SCORM
+  QUIZ
+  ASSIGNMENT
+  LIVE_SESSION
+  TEXT
+}
+
+model Course {
+  id            String        @id @default(uuid())
+  titleAr       String
+  titleEn       String
+  descriptionAr String?       @db.Text
+  descriptionEn String?       @db.Text
+  thumbnail     String?
+  status        CourseStatus   @default(DRAFT)
+  modality      CourseModality @default(ONLINE)
+  instructorId  String
+  instructor    User          @relation("InstructorCourses", fields: [instructorId], references: [id])
+  departmentId  String?
+  categoryId    String?
+  category      CourseCategory? @relation(fields: [categoryId], references: [id])
+  duration      Int?          // in minutes
+  maxEnrollment Int?
+  startDate     DateTime?
+  endDate       DateTime?
+  isPublic      Boolean       @default(false)
+  sortOrder     Int           @default(0)
+  metadata      Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  modules     CourseModule[]
+  enrollments Enrollment[]
+
+  @@index([status])
+  @@index([instructorId])
+  @@index([categoryId])
+  @@index([departmentId])
+  @@map("courses")
+}
+
+model CourseCategory {
+  id          String   @id @default(uuid())
+  nameAr      String
+  nameEn      String
+  description String?
+  icon        String?
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  courses Course[]
+
+  @@map("course_categories")
+}
+
+model CourseModule {
+  id          String   @id @default(uuid())
+  courseId     String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  titleAr     String
+  titleEn     String
+  description String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessons Lesson[]
+
+  @@index([courseId])
+  @@map("course_modules")
+}
+
+model Lesson {
+  id          String     @id @default(uuid())
+  moduleId    String
+  module      CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  titleAr     String
+  titleEn     String
+  type        LessonType @default(TEXT)
+  content     String?    @db.Text
+  videoUrl    String?
+  fileUrl     String?
+  duration    Int?       // in minutes
+  sortOrder   Int        @default(0)
+  isPreview   Boolean    @default(false)
+  metadata    Json?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  progress LessonProgress[]
+
+  @@index([moduleId])
+  @@map("lessons")
+}
+
+model Enrollment {
+  id           String           @id @default(uuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  courseId      String
+  course       Course           @relation(fields: [courseId], references: [id])
+  status       EnrollmentStatus @default(ENROLLED)
+  progress     Float            @default(0) // 0-100 percentage
+  enrolledAt   DateTime         @default(now())
+  completedAt  DateTime?
+  grade        Float?
+  certificateUrl String?
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed   Boolean  @default(false)
+  timeSpent   Int      @default(0) // in seconds
+  lastAccessed DateTime @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@map("lesson_progress")
 }
 
 model AuditLog {
