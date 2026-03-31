@@ -38,10 +38,13 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  auditLogs    AuditLog[]
-  enrollments  Enrollment[]
-  coursesTaught Course[]     @relation("InstructorCourses")
+  auditLogs      AuditLog[]
+  enrollments    Enrollment[]
+  coursesTaught  Course[]     @relation("InstructorCourses")
   lessonProgress LessonProgress[]
+  quizAttempts   QuizAttempt[]
+  certificates   Certificate[]
+  notifications  Notification[]
 
   @@index([email])
   @@index([role])
@@ -125,8 +128,10 @@ model Course {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
-  modules     CourseModule[]
-  enrollments Enrollment[]
+  modules      CourseModule[]
+  enrollments  Enrollment[]
+  quizzes      Quiz[]
+  certificates Certificate[]
 
   @@index([status])
   @@index([instructorId])
@@ -225,6 +230,167 @@ model LessonProgress {
   @@index([userId])
   @@index([lessonId])
   @@map("lesson_progress")
+}
+
+// ========================
+// Assessment Models
+// ========================
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+  ESSAY
+}
+
+model Quiz {
+  id            String     @id @default(uuid())
+  courseId       String
+  course        Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  titleAr       String
+  titleEn       String
+  description   String?
+  duration      Int?       // in minutes
+  passingScore  Float      @default(60) // percentage
+  maxAttempts   Int        @default(3)
+  shuffleQuestions Boolean @default(false)
+  showResults   Boolean    @default(true)
+  isActive      Boolean    @default(true)
+  sortOrder     Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@index([courseId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id           String       @id @default(uuid())
+  quizId       String
+  quiz         Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  type         QuestionType @default(MULTIPLE_CHOICE)
+  questionAr   String       @db.Text
+  questionEn   String?      @db.Text
+  options      Json?        // array of { id, textAr, textEn, isCorrect }
+  correctAnswer String?
+  points       Float        @default(1)
+  explanation  String?
+  sortOrder    Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  answers QuizAnswer[]
+
+  @@index([quizId])
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id          String    @id @default(uuid())
+  quizId      String
+  quiz        Quiz      @relation(fields: [quizId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  score       Float?
+  totalPoints Float?
+  percentage  Float?
+  passed      Boolean?
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  timeSpent   Int?      // in seconds
+
+  answers QuizAnswer[]
+
+  @@index([quizId])
+  @@index([userId])
+  @@map("quiz_attempts")
+}
+
+model QuizAnswer {
+  id         String       @id @default(uuid())
+  attemptId  String
+  attempt    QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id])
+  answer     String?      @db.Text
+  isCorrect  Boolean?
+  points     Float        @default(0)
+
+  @@index([attemptId])
+  @@map("quiz_answers")
+}
+
+// ========================
+// Certificate Models
+// ========================
+
+model CertificateTemplate {
+  id          String   @id @default(uuid())
+  nameAr      String
+  nameEn      String
+  htmlTemplate String  @db.Text
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  certificates Certificate[]
+
+  @@map("certificate_templates")
+}
+
+model Certificate {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  courseId      String
+  course       Course    @relation(fields: [courseId], references: [id])
+  templateId   String?
+  template     CertificateTemplate? @relation(fields: [templateId], references: [id])
+  certificateNo String   @unique
+  grade        Float?
+  issuedAt     DateTime  @default(now())
+  expiresAt    DateTime?
+  pdfUrl       String?
+  metadata     Json?
+
+  @@index([userId])
+  @@index([courseId])
+  @@map("certificates")
+}
+
+// ========================
+// Notification Model
+// ========================
+
+enum NotificationType {
+  ENROLLMENT
+  COURSE_UPDATE
+  QUIZ_RESULT
+  CERTIFICATE
+  SYSTEM
+  REMINDER
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType @default(SYSTEM)
+  titleAr   String
+  titleEn   String?
+  messageAr String           @db.Text
+  messageEn String?          @db.Text
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
 }
 
 model AuditLog {

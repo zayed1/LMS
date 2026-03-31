@@ -10,6 +10,7 @@ import {
   GraduationCap,
   BookOpen,
   Search,
+  Award,
   BarChart3,
   Settings,
   ChevronLeft,
@@ -30,6 +31,7 @@ const navItems: NavItem[] = [
   { label: 'الدورات', href: '/courses', icon: GraduationCap },
   { label: 'دوراتي', href: '/my-courses', icon: BookOpen },
   { label: 'كتالوج الدورات', href: '/catalog', icon: Search },
+  { label: 'شهاداتي', href: '/certificates', icon: Award },
   { label: 'التقارير', href: '/reports', icon: BarChart3 },
   { label: 'الإعدادات', href: '/settings', icon: Settings },
 ];
