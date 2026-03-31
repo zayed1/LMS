@@ -9,6 +9,9 @@ async function seedAdmin() {
   const logger = new Logger('Seed');
   const prisma = new PrismaClient();
   try {
+    // حذف الحساب القديم إن وجد
+    await prisma.user.deleteMany({ where: { email: 'admin@gcdc.gov.sa' } }).catch(() => {});
+
     const admin = await prisma.user.findUnique({ where: { email: 'admin' } });
     if (!admin) {
       await prisma.department.upsert({
