@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  TRAINING_MANAGER
+  INSTRUCTOR
+  LEARNER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  password     String
+  nameAr       String
+  nameEn       String
+  role         Role       @default(LEARNER)
+  status       UserStatus @default(PENDING)
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  avatar       String?
+  phone        String?
+  lastLogin    DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  auditLogs AuditLog[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@index([departmentId])
+  @@map("users")
+}
+
+model Department {
+  id          String       @id @default(uuid())
+  nameAr      String
+  nameEn      String
+  parentId    String?
+  parent      Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children    Department[] @relation("DepartmentHierarchy")
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  users User[]
+
+  @@index([parentId])
+  @@map("departments")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
