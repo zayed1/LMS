@@ -6,19 +6,23 @@ import { useAuthStore } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useAuthStore();
+  const { login } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
     try {
       await login(email, password);
       router.push("/dashboard");
     } catch {
       setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+    } finally {
+      setIsLoading(false);
     }
   };
 
