@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-primary">GCDC</h1>
+        <h1 className="text-xl font-bold text-primary">المركز الخليجي للوقاية من الأمراض ومكافحتها</h1>
         <p className="mt-4 text-lg text-gray-600">جاري التحميل...</p>
       </div>
     </div>

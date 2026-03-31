@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'GCDC - نظام إدارة التعلم',
-  description: 'نظام إدارة التعلم الخاص بمركز الخليج للتطوير والتدريب',
+  title: 'نظام إدارة التعلم - المركز الخليجي للوقاية من الأمراض ومكافحتها',
+  description: 'نظام إدارة التعلم - المركز الخليجي للوقاية من الأمراض ومكافحتها',
 };
 
 export default function RootLayout({

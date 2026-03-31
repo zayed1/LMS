@@ -28,10 +28,10 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 bg-primary rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">GCDC</span>
+            <span className="text-white text-lg font-bold">GCDC</span>
           </div>
-          <h1 className="text-2xl font-bold text-primary">نظام إدارة التعلم</h1>
-          <p className="text-gray-500 mt-2">مركز الخليج للوقاية من الأمراض ومكافحتها</p>
+          <h1 className="text-xl font-bold text-primary">المركز الخليجي للوقاية من الأمراض ومكافحتها</h1>
+          <p className="text-gray-500 mt-2">نظام إدارة التعلم</p>
         </div>
 
         {/* Login Form */}
@@ -87,7 +87,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-sm text-gray-400 mt-6">
-          © 2026 GCDC - جميع الحقوق محفوظة
+          © 2026 المركز الخليجي للوقاية من الأمراض ومكافحتها - جميع الحقوق محفوظة
         </p>
       </div>
     </div>

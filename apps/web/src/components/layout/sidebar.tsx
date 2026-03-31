@@ -50,10 +50,10 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center justify-center border-b border-white/10 px-4">
         {!collapsed && (
-          <h1 className="text-xl font-bold">GCDC</h1>
+          <h1 className="text-sm font-bold leading-tight">المركز الخليجي للوقاية من الأمراض</h1>
         )}
         {collapsed && (
-          <span className="text-lg font-bold">G</span>
+          <span className="text-lg font-bold">خ</span>
         )}
       </div>
 
