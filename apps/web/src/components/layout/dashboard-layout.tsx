@@ -16,7 +16,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-primary-lighter">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(prev => !prev)} />
 
       {/* Main Content Area */}
       <div

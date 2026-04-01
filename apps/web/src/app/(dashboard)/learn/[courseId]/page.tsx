@@ -66,7 +66,14 @@ export default function LearnPage() {
   }
 
   if (!progress) {
-    return <div className="text-center py-12 text-gray-500">لم يتم العثور على بيانات التقدم</div>;
+    return (
+      <div className="text-center py-12">
+        <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+        <p className="text-gray-500 mb-2">لم يتم العثور على بيانات التقدم</p>
+        <p className="text-gray-400 text-sm mb-4">قد تحتاج للتسجيل في الدورة أولاً</p>
+        <a href="/catalog" className="inline-flex px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90">تصفح الدورات</a>
+      </div>
+    );
   }
 
   const courseProgress = progress.enrollment?.progress || 0;

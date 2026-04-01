@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUsers, deleteUser, importUsersCSV, type User } from "@/hooks/use-users";
 import { useDepartments } from "@/hooks/use-departments";
 import { UserFormModal } from "@/components/users/user-form-modal";
@@ -30,6 +30,15 @@ export default function UsersPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setActiveMenu(null);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const { data, isLoading, refetch } = useUsers({
     page,
@@ -186,7 +195,7 @@ export default function UsersPage() {
                     {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString("ar-SA") : "-"}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="relative">
+                    <div className="relative" ref={activeMenu === user.id ? menuRef : undefined}>
                       <button
                         onClick={() => setActiveMenu(activeMenu === user.id ? null : user.id)}
                         className="p-1 rounded-lg hover:bg-gray-100"
