@@ -19,8 +19,9 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push("/dashboard");
-    } catch {
-      setError("اسم المستخدم أو كلمة المرور غير صحيحة");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'خطأ غير معروف';
+      setError(`فشل تسجيل الدخول: ${msg} (API: ${process.env.NEXT_PUBLIC_API_URL || 'NOT SET'})`);
     } finally {
       setIsLoading(false);
     }
