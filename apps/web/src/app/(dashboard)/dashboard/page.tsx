@@ -1,22 +1,41 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Users, BookOpen, GraduationCap, TrendingUp } from "lucide-react";
+import api from "@/lib/api";
 
-const stats = [
-  { title: "إجمالي المستخدمين", value: "0", icon: Users, color: "bg-primary", change: "+0%" },
-  { title: "الدورات النشطة", value: "0", icon: BookOpen, color: "bg-primary-light", change: "+0%" },
-  { title: "المتعلمين النشطين", value: "0", icon: GraduationCap, color: "bg-success", change: "+0%" },
-  { title: "معدل الإكمال", value: "0%", icon: TrendingUp, color: "bg-amber-500", change: "+0%" },
-];
-
-const recentActivities = [
-  { user: "أحمد محمد", action: "أكمل دورة", target: "أساسيات الأمن السيبراني", time: "منذ ساعتين" },
-  { user: "فاطمة علي", action: "بدأ دورة", target: "إدارة المشاريع", time: "منذ 3 ساعات" },
-  { user: "خالد سعود", action: "اجتاز اختبار", target: "مقدمة في البرمجة", time: "منذ 5 ساعات" },
-];
+interface DashboardStats {
+  users: { total: number; active: number };
+  courses: { total: number; published: number };
+  enrollments: { total: number; completed: number; completionRate: number };
+  departments: number;
+}
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    api.get("/reports/dashboard")
+      .then((res) => setStats(res.data))
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const statCards = [
+    { title: "إجمالي المستخدمين", value: stats?.users.total ?? 0, icon: Users, color: "bg-primary", change: stats ? `${stats.users.active} نشط` : "" },
+    { title: "الدورات النشطة", value: stats?.courses.published ?? 0, icon: BookOpen, color: "bg-primary-light", change: stats ? `${stats.courses.total} إجمالي` : "" },
+    { title: "المتعلمين المسجلين", value: stats?.enrollments.total ?? 0, icon: GraduationCap, color: "bg-success", change: stats ? `${stats.enrollments.completed} مكتمل` : "" },
+    { title: "معدل الإكمال", value: `${stats?.enrollments.completionRate ?? 0}%`, icon: TrendingUp, color: "bg-amber-500", change: "" },
+  ];
+
+  const recentActivities = [
+    { user: "أحمد محمد", action: "أكمل دورة", target: "أساسيات الأمن السيبراني", time: "منذ ساعتين" },
+    { user: "فاطمة علي", action: "بدأ دورة", target: "إدارة المشاريع", time: "منذ 3 ساعات" },
+    { user: "خالد سعود", action: "اجتاز اختبار", target: "مقدمة في البرمجة", time: "منذ 5 ساعات" },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
@@ -26,13 +45,17 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <div key={stat.title} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">{stat.title}</p>
-                <p className="text-3xl font-bold text-gray-800 mt-1">{stat.value}</p>
-                <span className="text-xs text-success mt-1 inline-block">{stat.change}</span>
+                {isLoading ? (
+                  <div className="h-9 w-16 bg-gray-200 rounded animate-pulse mt-1" />
+                ) : (
+                  <p className="text-3xl font-bold text-gray-800 mt-1">{stat.value}</p>
+                )}
+                {stat.change && <span className="text-xs text-success mt-1 inline-block">{stat.change}</span>}
               </div>
               <div className={`${stat.color} p-3 rounded-lg`}>
                 <stat.icon className="w-6 h-6 text-white" />
