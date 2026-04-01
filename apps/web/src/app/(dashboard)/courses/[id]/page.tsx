@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useCourse, updateCourse, publishCourse, archiveCourse, addModule, deleteModule as delModule, addLesson, deleteLesson as delLesson, updateModule, updateLesson } from "@/hooks/use-courses";
+import api from "@/lib/api";
 import { ArrowRight, Send, Archive, Plus, Edit, Trash2, ChevronDown, ChevronLeft, Play, FileText, Video, BookOpen, X, GripVertical, Users, Clock } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -208,16 +209,9 @@ export default function CourseDetailPage() {
         </div>
       )}
 
-      {/* Students Tab placeholder */}
+      {/* Students Tab */}
       {activeTab === "students" && (
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Users className="w-5 h-5 text-primary" />
-            <h3 className="font-medium text-gray-800">المتدربين المسجلين</h3>
-            <span className="text-sm text-gray-400">({course._count?.enrollments || 0})</span>
-          </div>
-          <p className="text-center text-gray-400 py-8">سيتم عرض قائمة المتدربين هنا</p>
-        </div>
+        <StudentsTab courseId={courseId} enrollmentCount={course._count?.enrollments || 0} />
       )}
 
       {/* Module Modal */}
@@ -332,6 +326,88 @@ function LessonModal({ moduleId, lesson, onClose, onSuccess }: { moduleId: strin
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+const enrollStatusLabels: Record<string, { label: string; cls: string }> = {
+  ENROLLED: { label: "مسجل", cls: "bg-blue-100 text-blue-700" },
+  IN_PROGRESS: { label: "قيد التعلم", cls: "bg-amber-100 text-amber-700" },
+  COMPLETED: { label: "مكتمل", cls: "bg-green-100 text-green-700" },
+  DROPPED: { label: "منسحب", cls: "bg-red-100 text-red-700" },
+};
+
+function StudentsTab({ courseId, enrollmentCount }: { courseId: string; enrollmentCount: number }) {
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get(`/enrollments/course/${courseId}?limit=50`)
+      .then(res => setStudents(res.data?.data || res.data || []))
+      .catch(() => { toast.error("حدث خطأ في تحميل المتدربين"); })
+      .finally(() => setLoading(false));
+  }, [courseId]);
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <Users className="w-5 h-5 text-primary" />
+          <h3 className="font-medium text-gray-800">المتدربين المسجلين</h3>
+          <span className="text-sm text-gray-400">({enrollmentCount})</span>
+        </div>
+      </div>
+      {loading ? (
+        <div className="p-6 space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-12 bg-gray-100 rounded animate-pulse" />)}
+        </div>
+      ) : students.length === 0 ? (
+        <p className="text-center text-gray-400 py-12 text-sm">لا يوجد متدربين مسجلين في هذه الدورة</p>
+      ) : (
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              <th className="text-right px-6 py-3 text-xs font-medium text-gray-500">المتدرب</th>
+              <th className="text-right px-6 py-3 text-xs font-medium text-gray-500">الحالة</th>
+              <th className="text-right px-6 py-3 text-xs font-medium text-gray-500">التقدم</th>
+              <th className="text-right px-6 py-3 text-xs font-medium text-gray-500">تاريخ التسجيل</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {students.map((e: any) => (
+              <tr key={e.id} className="hover:bg-gray-50">
+                <td className="px-6 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                      <span className="text-primary text-xs font-bold">{e.user?.nameAr?.[0] || "?"}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">{e.user?.nameAr}</p>
+                      <p className="text-xs text-gray-400" dir="ltr">{e.user?.email}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-3">
+                  <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${enrollStatusLabels[e.status]?.cls || "bg-gray-100"}`}>
+                    {enrollStatusLabels[e.status]?.label || e.status}
+                  </span>
+                </td>
+                <td className="px-6 py-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-gray-100 rounded-full max-w-[80px]">
+                      <div className="h-full bg-primary rounded-full" style={{ width: `${e.progress || 0}%` }} />
+                    </div>
+                    <span className="text-xs text-gray-500">{e.progress || 0}%</span>
+                  </div>
+                </td>
+                <td className="px-6 py-3 text-sm text-gray-500">
+                  {e.enrolledAt ? new Date(e.enrolledAt).toLocaleDateString("ar-SA") : "-"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

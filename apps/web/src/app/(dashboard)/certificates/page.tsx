@@ -26,7 +26,7 @@ export default function CertificatesPage() {
   useEffect(() => {
     api.get("/certificates/my").then(res => {
       setCertificates(res.data);
-    }).catch(() => {}).finally(() => setIsLoading(false));
+    }).catch(() => { toast.error("حدث خطأ في تحميل الشهادات"); }).finally(() => setIsLoading(false));
   }, []);
 
   const handleVerify = async () => {

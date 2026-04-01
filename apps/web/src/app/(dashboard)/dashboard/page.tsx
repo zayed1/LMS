@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Users, BookOpen, GraduationCap, TrendingUp } from "lucide-react";
 import api from "@/lib/api";
+import { toast } from "@/lib/toast";
 
 interface DashboardStats {
   users: { total: number; active: number };
@@ -43,7 +44,7 @@ export default function DashboardPage() {
     ]).then(([statsRes, activitiesRes]) => {
       setStats(statsRes.data);
       setActivities(activitiesRes.data);
-    }).catch(() => {}).finally(() => setIsLoading(false));
+    }).catch(() => { toast.error("حدث خطأ في تحميل البيانات"); }).finally(() => setIsLoading(false));
   }, []);
 
   const statCards = [

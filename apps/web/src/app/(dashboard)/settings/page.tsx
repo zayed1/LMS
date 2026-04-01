@@ -221,7 +221,10 @@ function NotificationsTab() {
 }
 
 function AppearanceTab() {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('lms-theme') || 'light';
+    return 'light';
+  });
 
   const themes = [
     { key: "light", label: "فاتح", icon: Sun, desc: "المظهر الفاتح الافتراضي" },
@@ -234,7 +237,7 @@ function AppearanceTab() {
       <h2 className="text-lg font-semibold text-gray-800">المظهر</h2>
       <div className="grid grid-cols-3 gap-4">
         {themes.map(t => (
-          <button key={t.key} onClick={() => { setTheme(t.key); toast.info(`تم اختيار المظهر ${t.label}`); }}
+          <button key={t.key} onClick={() => { setTheme(t.key); localStorage.setItem('lms-theme', t.key); toast.success(`تم اختيار المظهر ${t.label}`); }}
             className={`relative p-4 rounded-xl border-2 text-center transition-colors ${
               theme === t.key ? "border-primary bg-primary/5" : "border-gray-200 hover:border-gray-300"
             }`}>
@@ -254,7 +257,10 @@ function AppearanceTab() {
 }
 
 function LanguageTab() {
-  const [lang, setLang] = useState("ar");
+  const [lang, setLang] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('lms-lang') || 'ar';
+    return 'ar';
+  });
 
   const languages = [
     { key: "ar", label: "العربية", native: "العربية", flag: "🇸🇦" },
@@ -266,7 +272,7 @@ function LanguageTab() {
       <h2 className="text-lg font-semibold text-gray-800">اللغة</h2>
       <div className="space-y-3">
         {languages.map(l => (
-          <button key={l.key} onClick={() => { setLang(l.key); toast.info(`تم اختيار اللغة ${l.native}`); }}
+          <button key={l.key} onClick={() => { setLang(l.key); localStorage.setItem('lms-lang', l.key); toast.success(`تم اختيار اللغة ${l.native}`); }}
             className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-colors ${
               lang === l.key ? "border-primary bg-primary/5" : "border-gray-200 hover:border-gray-300"
             }`}>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useCourseProgress, updateLessonProgress } from "@/hooks/use-courses";
 import { ChevronDown, ChevronLeft, Check, Play, FileText, Video, BookOpen, ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 const typeIcons: Record<string, any> = {
   TEXT: FileText, VIDEO: Video, DOCUMENT: FileText, QUIZ: BookOpen,
@@ -48,7 +49,7 @@ export default function LearnPage() {
       await updateLessonProgress(currentLessonId, { completed: true });
       refetch();
       if (nextLesson) setCurrentLessonId(nextLesson.id);
-    } catch { /* ignore */ }
+    } catch { toast.error("حدث خطأ في تحديث التقدم"); }
     finally { setCompleting(false); }
   };
 
