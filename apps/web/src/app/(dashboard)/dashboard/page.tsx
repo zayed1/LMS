@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Users, BookOpen, GraduationCap, TrendingUp } from "lucide-react";
 
 const stats = [
@@ -69,19 +70,19 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">إجراءات سريعة</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "إضافة مستخدم", href: "/users?action=new", icon: "👤" },
+              { label: "إضافة مستخدم", href: "/users", icon: "👤" },
               { label: "إنشاء دورة", href: "/courses/new", icon: "📚" },
-              { label: "إنشاء اختبار", href: "/assessments/new", icon: "📝" },
+              { label: "الدورات", href: "/courses", icon: "📝" },
               { label: "عرض التقارير", href: "/reports", icon: "📊" },
             ].map((action) => (
-              <a
+              <Link
                 key={action.label}
                 href={action.href}
                 className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-colors"
               >
                 <span className="text-2xl">{action.icon}</span>
                 <span className="text-sm font-medium text-gray-700">{action.label}</span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
