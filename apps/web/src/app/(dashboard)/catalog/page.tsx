@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useCourses, useCategories, enrollInCourse } from "@/hooks/use-courses";
-import { BookOpen, Search, Users, Clock, Layers, UserPlus } from "lucide-react";
+import { BookOpen, Search, Users, Clock, Layers, UserPlus, ArrowUpDown, CheckCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { useMyEnrollments } from "@/hooks/use-courses";
 
 const modalityLabels: Record<string, string> = { ONLINE: "عن بعد", IN_PERSON: "حضوري", BLENDED: "مدمج" };
 
@@ -17,6 +18,9 @@ export default function CatalogPage() {
     page, limit: 12, search, status: "PUBLISHED", categoryId: categoryFilter,
   });
   const [enrolling, setEnrolling] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string>("");
+  const { enrollments } = useMyEnrollments();
+  const enrolledCourseIds = new Set(enrollments.map(e => e.courseId));
 
   const handleEnroll = async (courseId: string) => {
     setEnrolling(courseId);
@@ -40,11 +44,19 @@ export default function CatalogPage() {
 
       {/* Search + Categories */}
       <div className="space-y-4">
-        <div className="relative max-w-md">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input type="text" placeholder="ابحث عن دورة..." value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pr-11 pl-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" />
+        <div className="flex gap-3 items-center">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input type="text" placeholder="ابحث عن دورة..." value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1); }}
+              className="w-full pr-11 pl-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" />
+          </div>
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+            className="px-3 py-3 border border-gray-300 rounded-xl text-sm bg-white">
+            <option value="">الأحدث</option>
+            <option value="popular">الأكثر تسجيلاً</option>
+            <option value="title">أبجدي</option>
+          </select>
         </div>
 
         {categories.length > 0 && (
@@ -102,11 +114,17 @@ export default function CatalogPage() {
                   {course.duration && <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {course.duration}د</span>}
                   <span>{modalityLabels[course.modality]}</span>
                 </div>
-                <button onClick={() => handleEnroll(course.id)} disabled={enrolling === course.id}
-                  className="w-full flex items-center justify-center gap-2 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
-                  <UserPlus className="w-4 h-4" />
-                  {enrolling === course.id ? "جاري التسجيل..." : "التسجيل في الدورة"}
-                </button>
+                {enrolledCourseIds.has(course.id) ? (
+                  <div className="w-full flex items-center justify-center gap-2 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-medium border border-green-200">
+                    <CheckCircle className="w-4 h-4" /> مسجل بالفعل
+                  </div>
+                ) : (
+                  <button onClick={() => handleEnroll(course.id)} disabled={enrolling === course.id}
+                    className="w-full flex items-center justify-center gap-2 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                    <UserPlus className="w-4 h-4" />
+                    {enrolling === course.id ? "جاري التسجيل..." : "التسجيل في الدورة"}
+                  </button>
+                )}
               </div>
             </div>
           ))}

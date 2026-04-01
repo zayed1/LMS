@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Users, BookOpen, GraduationCap, TrendingUp } from "lucide-react";
+import { Users, BookOpen, GraduationCap, TrendingUp, UserPlus, PlusCircle, Layers, BarChart3 } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "@/lib/toast";
 
@@ -125,17 +125,19 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">إجراءات سريعة</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "إضافة مستخدم", href: "/users", icon: "👤" },
-              { label: "إنشاء دورة", href: "/courses/new", icon: "📚" },
-              { label: "الدورات", href: "/courses", icon: "📝" },
-              { label: "عرض التقارير", href: "/reports", icon: "📊" },
+              { label: "إضافة مستخدم", href: "/users", icon: UserPlus, color: "bg-blue-500" },
+              { label: "إنشاء دورة", href: "/courses/new", icon: PlusCircle, color: "bg-primary" },
+              { label: "الدورات", href: "/courses", icon: Layers, color: "bg-green-500" },
+              { label: "عرض التقارير", href: "/reports", icon: BarChart3, color: "bg-amber-500" },
             ].map((action) => (
               <Link
                 key={action.label}
                 href={action.href}
-                className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-colors"
+                className="flex items-center gap-3 p-4 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 transition-all hover:shadow-sm"
               >
-                <span className="text-2xl">{action.icon}</span>
+                <div className={`${action.color} w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                  <action.icon className="w-5 h-5 text-white" />
+                </div>
                 <span className="text-sm font-medium text-gray-700">{action.label}</span>
               </Link>
             ))}

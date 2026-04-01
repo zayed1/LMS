@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { toast } from "@/lib/toast";
-import { Award, Download, ExternalLink, Search, CheckCircle } from "lucide-react";
+import { Award, Download, ExternalLink, Search, CheckCircle, X, QrCode, Share2 } from "lucide-react";
 
 interface Certificate {
   id: string;
@@ -22,6 +22,7 @@ export default function CertificatesPage() {
   const [verifyNo, setVerifyNo] = useState("");
   const [verifyResult, setVerifyResult] = useState<any>(null);
   const [verifying, setVerifying] = useState(false);
+  const [previewCert, setPreviewCert] = useState<Certificate | null>(null);
 
   useEffect(() => {
     api.get("/certificates/my").then(res => {
@@ -55,12 +56,7 @@ export default function CertificatesPage() {
   };
 
   const handleView = (cert: Certificate) => {
-    if (cert.pdfUrl) {
-      window.open(cert.pdfUrl, '_blank');
-    } else {
-      // Show certificate details in a simple view
-      toast.info(`شهادة: ${cert.course.titleAr} - رقم: ${cert.certificateNo}`);
-    }
+    setPreviewCert(cert);
   };
 
   return (
@@ -149,6 +145,69 @@ export default function CertificatesPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Certificate Preview Modal */}
+      {previewCert && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setPreviewCert(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Certificate Design */}
+            <div className="bg-gradient-to-bl from-primary to-primary-light p-8 text-center text-white relative">
+              <button onClick={() => setPreviewCert(null)} className="absolute top-3 left-3 p-1 rounded-lg bg-white/10 hover:bg-white/20">
+                <X className="w-5 h-5" />
+              </button>
+              <div className="w-16 h-16 bg-white/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <Award className="w-8 h-8" />
+              </div>
+              <p className="text-white/70 text-xs mb-1">شهادة إتمام</p>
+              <h3 className="text-xl font-bold mb-1">{previewCert.course.titleAr}</h3>
+              <p className="text-white/80 text-sm">{previewCert.course.titleEn}</p>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <span className="text-gray-500 block text-xs mb-1">رقم الشهادة</span>
+                  <span className="font-mono font-bold text-gray-800" dir="ltr">{previewCert.certificateNo}</span>
+                </div>
+                {previewCert.grade && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <span className="text-gray-500 block text-xs mb-1">الدرجة</span>
+                    <span className="font-bold text-primary">{previewCert.grade}%</span>
+                  </div>
+                )}
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <span className="text-gray-500 block text-xs mb-1">تاريخ الإصدار</span>
+                  <span className="font-medium text-gray-800">{new Date(previewCert.issuedAt).toLocaleDateString("ar-SA")}</span>
+                </div>
+                {previewCert.expiresAt && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <span className="text-gray-500 block text-xs mb-1">تاريخ الانتهاء</span>
+                    <span className="font-medium text-gray-800">{new Date(previewCert.expiresAt).toLocaleDateString("ar-SA")}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* QR Code placeholder */}
+              <div className="flex items-center justify-center py-4">
+                <div className="w-28 h-28 bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-300">
+                  <QrCode className="w-10 h-10 text-gray-400 mb-1" />
+                  <span className="text-[10px] text-gray-400">رمز التحقق</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button onClick={() => { handleDownload(previewCert); }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90">
+                  <Download className="w-4 h-4" /> تحميل
+                </button>
+                <button onClick={() => { navigator.clipboard.writeText(previewCert.certificateNo); toast.success("تم نسخ رقم الشهادة"); }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+                  <Share2 className="w-4 h-4" /> مشاركة
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

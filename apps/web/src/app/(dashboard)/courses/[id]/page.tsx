@@ -29,6 +29,33 @@ export default function CourseDetailPage() {
   const [editingModule, setEditingModule] = useState<any>(null);
   const [editingLesson, setEditingLesson] = useState<any>(null);
   const [currentModuleId, setCurrentModuleId] = useState("");
+  const [dragModuleId, setDragModuleId] = useState<string | null>(null);
+
+  const handleModuleDragStart = (e: React.DragEvent, moduleId: string) => {
+    setDragModuleId(moduleId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleModuleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleModuleDrop = async (e: React.DragEvent, targetModuleId: string) => {
+    e.preventDefault();
+    if (!dragModuleId || dragModuleId === targetModuleId || !course?.modules) return;
+    const ids = course.modules.map(m => m.id);
+    const fromIdx = ids.indexOf(dragModuleId);
+    const toIdx = ids.indexOf(targetModuleId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    ids.splice(fromIdx, 1);
+    ids.splice(toIdx, 0, dragModuleId);
+    setDragModuleId(null);
+    try {
+      await api.put(`/courses/${courseId}/reorder-modules`, { moduleIds: ids });
+      refetch();
+    } catch { toast.error("حدث خطأ في إعادة الترتيب"); }
+  };
 
   if (isLoading) {
     return (
@@ -125,10 +152,18 @@ export default function CourseDetailPage() {
       {activeTab === "content" && (
         <div className="space-y-4">
           {course.modules?.map((mod) => (
-            <div key={mod.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div key={mod.id}
+              draggable
+              onDragStart={e => handleModuleDragStart(e, mod.id)}
+              onDragOver={handleModuleDragOver}
+              onDrop={e => handleModuleDrop(e, mod.id)}
+              onDragEnd={() => setDragModuleId(null)}
+              className={`bg-white rounded-xl border overflow-hidden transition-all ${
+                dragModuleId === mod.id ? "border-primary opacity-50 scale-[0.98]" : "border-gray-200"
+              }`}>
               <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50" onClick={() => toggleModule(mod.id)}>
                 <div className="flex items-center gap-3">
-                  <GripVertical className="w-4 h-4 text-gray-300" />
+                  <GripVertical className="w-4 h-4 text-gray-300 cursor-grab active:cursor-grabbing" />
                   {expandedModules.has(mod.id) ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronLeft className="w-4 h-4 text-gray-400" />}
                   <div>
                     <h3 className="font-medium text-gray-800">{mod.titleAr}</h3>
