@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useCourse, updateCourse, publishCourse, archiveCourse, addModule, deleteModule as delModule, addLesson, deleteLesson as delLesson, updateModule, updateLesson } from "@/hooks/use-courses";
 import { ArrowRight, Send, Archive, Plus, Edit, Trash2, ChevronDown, ChevronLeft, Play, FileText, Video, BookOpen, X, GripVertical, Users, Clock } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 const lessonTypeLabels: Record<string, { label: string; icon: any }> = {
   TEXT: { label: "نص", icon: FileText },
@@ -254,7 +255,7 @@ function ModuleModal({ courseId, module: mod, onClose, onSuccess }: { courseId: 
       if (isEditing) { await updateModule(mod.id, form); }
       else { await addModule(courseId, form); }
       onSuccess();
-    } catch { alert("حدث خطأ"); }
+    } catch { toast.error("حدث خطأ"); }
     finally { setSubmitting(false); }
   };
 
@@ -293,7 +294,7 @@ function LessonModal({ moduleId, lesson, onClose, onSuccess }: { moduleId: strin
       if (isEditing) { await updateLesson(lesson.id, payload); }
       else { await addLesson(moduleId, payload); }
       onSuccess();
-    } catch { alert("حدث خطأ"); }
+    } catch { toast.error("حدث خطأ"); }
     finally { setSubmitting(false); }
   };
 

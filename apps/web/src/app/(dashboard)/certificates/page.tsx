@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
+import { toast } from "@/lib/toast";
 import { Award, Download, ExternalLink, Search, CheckCircle } from "lucide-react";
 
 interface Certificate {
@@ -29,7 +30,10 @@ export default function CertificatesPage() {
   }, []);
 
   const handleVerify = async () => {
-    if (!verifyNo.trim()) return;
+    if (!verifyNo.trim()) {
+      toast.error("يرجى إدخال رقم الشهادة");
+      return;
+    }
     setVerifying(true);
     setVerifyResult(null);
     try {
@@ -39,6 +43,23 @@ export default function CertificatesPage() {
       setVerifyResult({ valid: false });
     } finally {
       setVerifying(false);
+    }
+  };
+
+  const handleDownload = (cert: Certificate) => {
+    if (cert.pdfUrl) {
+      window.open(cert.pdfUrl, '_blank');
+    } else {
+      toast.info("ملف الشهادة غير متوفر حالياً");
+    }
+  };
+
+  const handleView = (cert: Certificate) => {
+    if (cert.pdfUrl) {
+      window.open(cert.pdfUrl, '_blank');
+    } else {
+      // Show certificate details in a simple view
+      toast.info(`شهادة: ${cert.course.titleAr} - رقم: ${cert.certificateNo}`);
     }
   };
 
@@ -57,7 +78,7 @@ export default function CertificatesPage() {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text" value={verifyNo} onChange={e => setVerifyNo(e.target.value)}
-              placeholder="أدخل رقم الشهادة (GCDC-2026-XXXXX)"
+              placeholder="أدخل رقم الشهادة"
               className="w-full pr-10 pl-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               dir="ltr" onKeyDown={e => e.key === 'Enter' && handleVerify()}
             />
@@ -116,10 +137,12 @@ export default function CertificatesPage() {
                   {cert.expiresAt && <span>تنتهي: {new Date(cert.expiresAt).toLocaleDateString("ar-SA")}</span>}
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex-1 flex items-center justify-center gap-1 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+                  <button onClick={() => handleDownload(cert)}
+                    className="flex-1 flex items-center justify-center gap-1 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
                     <Download className="w-4 h-4" /> تحميل
                   </button>
-                  <button className="flex-1 flex items-center justify-center gap-1 py-2 border border-primary text-primary rounded-lg text-sm hover:bg-primary/5">
+                  <button onClick={() => handleView(cert)}
+                    className="flex-1 flex items-center justify-center gap-1 py-2 border border-primary text-primary rounded-lg text-sm hover:bg-primary/5">
                     <ExternalLink className="w-4 h-4" /> عرض
                   </button>
                 </div>

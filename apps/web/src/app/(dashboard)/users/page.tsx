@@ -5,6 +5,7 @@ import { useUsers, deleteUser, importUsersCSV, type User } from "@/hooks/use-use
 import { useDepartments } from "@/hooks/use-departments";
 import { UserFormModal } from "@/components/users/user-form-modal";
 import { Search, Plus, Upload, MoreVertical, Edit, Trash2, UserCheck, UserX } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 const roleLabels: Record<string, string> = {
   SUPER_ADMIN: "مدير النظام",
@@ -45,7 +46,7 @@ export default function UsersPage() {
       await deleteUser(id);
       refetch();
     } catch {
-      alert("حدث خطأ أثناء الحذف");
+      toast.error("حدث خطأ أثناء الحذف");
     }
   };
 
@@ -55,9 +56,9 @@ export default function UsersPage() {
     try {
       await importUsersCSV(file);
       refetch();
-      alert("تم استيراد المستخدمين بنجاح");
+      toast.success("تم استيراد المستخدمين بنجاح");
     } catch {
-      alert("حدث خطأ أثناء الاستيراد");
+      toast.error("حدث خطأ أثناء الاستيراد");
     }
     e.target.value = "";
   };

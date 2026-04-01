@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
+import { ToastContainer } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
 
 interface DashboardLayoutProps {
@@ -32,6 +33,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {children}
         </main>
       </div>
+      <ToastContainer />
     </div>
   );
 }

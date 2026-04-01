@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCourses, useCategories, enrollInCourse } from "@/hooks/use-courses";
 import { BookOpen, Search, Users, Clock, Layers, UserPlus } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 const modalityLabels: Record<string, string> = { ONLINE: "عن بعد", IN_PERSON: "حضوري", BLENDED: "مدمج" };
 
@@ -21,10 +22,10 @@ export default function CatalogPage() {
     setEnrolling(courseId);
     try {
       await enrollInCourse(courseId);
-      alert("تم التسجيل بنجاح!");
+      toast.success("تم التسجيل بنجاح!");
       refetch();
     } catch {
-      alert("حدث خطأ أثناء التسجيل");
+      toast.error("حدث خطأ أثناء التسجيل");
     } finally {
       setEnrolling(null);
     }

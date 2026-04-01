@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useCourses, deleteCourse, publishCourse, archiveCourse } from "@/hooks/use-courses";
 import { BookOpen, Plus, Search, Users, Clock, Layers, MoreVertical, Eye, Edit, Trash2, Send, Archive } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 const statusLabels: Record<string, { label: string; class: string }> = {
   DRAFT: { label: "مسودة", class: "bg-amber-100 text-amber-700" },
@@ -40,7 +41,7 @@ export default function CoursesPage() {
         await archiveCourse(id);
       }
       refetch();
-    } catch { alert("حدث خطأ"); }
+    } catch { toast.error("حدث خطأ"); }
   };
 
   return (

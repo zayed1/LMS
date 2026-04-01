@@ -12,15 +12,38 @@ interface DashboardStats {
   departments: number;
 }
 
+interface Activity {
+  id: string;
+  user: string;
+  action: string;
+  target?: string;
+  time: string;
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "الآن";
+  if (minutes < 60) return `منذ ${minutes} دقيقة`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `منذ ${hours} ساعة`;
+  const days = Math.floor(hours / 24);
+  return `منذ ${days} يوم`;
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/reports/dashboard")
-      .then((res) => setStats(res.data))
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
+    Promise.all([
+      api.get("/reports/dashboard"),
+      api.get("/reports/recent-activities?limit=5"),
+    ]).then(([statsRes, activitiesRes]) => {
+      setStats(statsRes.data);
+      setActivities(activitiesRes.data);
+    }).catch(() => {}).finally(() => setIsLoading(false));
   }, []);
 
   const statCards = [
@@ -28,12 +51,6 @@ export default function DashboardPage() {
     { title: "الدورات النشطة", value: stats?.courses.published ?? 0, icon: BookOpen, color: "bg-primary-light", change: stats ? `${stats.courses.total} إجمالي` : "" },
     { title: "المتعلمين المسجلين", value: stats?.enrollments.total ?? 0, icon: GraduationCap, color: "bg-success", change: stats ? `${stats.enrollments.completed} مكتمل` : "" },
     { title: "معدل الإكمال", value: `${stats?.enrollments.completionRate ?? 0}%`, icon: TrendingUp, color: "bg-amber-500", change: "" },
-  ];
-
-  const recentActivities = [
-    { user: "أحمد محمد", action: "أكمل دورة", target: "أساسيات الأمن السيبراني", time: "منذ ساعتين" },
-    { user: "فاطمة علي", action: "بدأ دورة", target: "إدارة المشاريع", time: "منذ 3 ساعات" },
-    { user: "خالد سعود", action: "اجتاز اختبار", target: "مقدمة في البرمجة", time: "منذ 5 ساعات" },
   ];
 
   return (
@@ -70,21 +87,35 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">آخر النشاطات</h2>
           <div className="space-y-4">
-            {recentActivities.map((activity, idx) => (
-              <div key={idx} className="flex items-start gap-3 pb-3 border-b border-gray-50 last:border-0">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary text-sm font-bold">{activity.user[0]}</span>
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-start gap-3 pb-3">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
+                    <div className="h-3 bg-gray-200 rounded w-1/4 animate-pulse" />
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm text-gray-800">
-                    <span className="font-medium">{activity.user}</span>{" "}
-                    {activity.action}{" "}
-                    <span className="text-primary">{activity.target}</span>
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+              ))
+            ) : activities.length === 0 ? (
+              <p className="text-center text-gray-400 py-6 text-sm">لا توجد نشاطات حديثة</p>
+            ) : (
+              activities.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3 pb-3 border-b border-gray-50 last:border-0">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-primary text-sm font-bold">{activity.user?.[0] || "?"}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-800">
+                      <span className="font-medium">{activity.user}</span>{" "}
+                      {activity.action}{" "}
+                      {activity.target && <span className="text-primary">{activity.target}</span>}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">{timeAgo(activity.time)}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
