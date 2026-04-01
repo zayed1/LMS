@@ -4,9 +4,9 @@ import { LessonType } from '@prisma/client';
 import { Type } from 'class-transformer';
 
 export class CreateLessonDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsUUID()
-  @IsNotEmpty()
   moduleId: string;
 
   @ApiProperty({ example: 'مقدمة' })
