@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useCourseProgress, updateLessonProgress } from "@/hooks/use-courses";
-import { ChevronDown, ChevronLeft, Check, Play, FileText, Video, BookOpen, ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { ChevronDown, ChevronLeft, Check, Play, FileText, Video, BookOpen, ArrowLeft, ArrowRight, Clock, Download, ExternalLink } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 const typeIcons: Record<string, any> = {
@@ -177,15 +177,38 @@ export default function LearnPage() {
               )}
 
               {(currentLesson.type === "TEXT" || currentLesson.type === "QUIZ" || currentLesson.type === "ASSIGNMENT") && currentLesson.content && (
-                <div className="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {currentLesson.content}
+                <div className="max-w-none text-gray-700 leading-relaxed">
+                  {currentLesson.content.split('\n').map((line: string, i: number) => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return <br key={i} />;
+                    if (trimmed.startsWith('# ')) return <h2 key={i} className="text-xl font-bold text-gray-800 mt-6 mb-3">{trimmed.slice(2)}</h2>;
+                    if (trimmed.startsWith('## ')) return <h3 key={i} className="text-lg font-semibold text-gray-800 mt-4 mb-2">{trimmed.slice(3)}</h3>;
+                    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) return <li key={i} className="mr-4 mb-1">{trimmed.slice(2)}</li>;
+                    if (/^\d+[\.\)]\s/.test(trimmed)) return <li key={i} className="mr-4 mb-1 list-decimal">{trimmed.replace(/^\d+[\.\)]\s/, '')}</li>;
+                    if (trimmed.startsWith('س') && trimmed.includes(':')) return <p key={i} className="font-semibold text-gray-800 mt-4 mb-1">{trimmed}</p>;
+                    return <p key={i} className="mb-2">{trimmed}</p>;
+                  })}
                 </div>
               )}
 
               {currentLesson.type === "DOCUMENT" && (
-                <div className="bg-gray-50 rounded-lg p-8 text-center">
-                  <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-600">مستند للتحميل</p>
+                <div className="bg-gray-50 rounded-xl p-8 text-center border border-gray-200">
+                  <FileText className="w-16 h-16 text-primary/30 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-700 mb-2">مستند تعليمي</h3>
+                  {currentLesson.fileUrl ? (
+                    <div className="flex items-center justify-center gap-3 mt-4">
+                      <a href={currentLesson.fileUrl} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90">
+                        <Download className="w-4 h-4" /> تحميل المستند
+                      </a>
+                      <a href={currentLesson.fileUrl} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100">
+                        <ExternalLink className="w-4 h-4" /> فتح في نافذة جديدة
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-sm">لم يتم إرفاق ملف بعد</p>
+                  )}
                 </div>
               )}
             </div>
