@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
+import { toast } from "@/lib/toast";
 import { Users, BookOpen, GraduationCap, TrendingUp, Building2, Award, BarChart3 } from "lucide-react";
 
 interface DashboardStats {
@@ -29,7 +30,7 @@ export default function ReportsPage() {
       setTopCourses(tc.data);
       setDeptReport(dr.data);
       setTrends(tr.data);
-    }).catch(() => {}).finally(() => setIsLoading(false));
+    }).catch(() => { toast.error("حدث خطأ في تحميل التقارير"); }).finally(() => setIsLoading(false));
   }, []);
 
   if (isLoading) {

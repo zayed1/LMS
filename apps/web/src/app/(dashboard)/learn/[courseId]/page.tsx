@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useCourseProgress, updateLessonProgress } from "@/hooks/use-courses";
 import { ChevronDown, ChevronLeft, Check, Play, FileText, Video, BookOpen, ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 const typeIcons: Record<string, any> = {
   TEXT: FileText, VIDEO: Video, DOCUMENT: FileText, QUIZ: BookOpen,
@@ -48,7 +49,7 @@ export default function LearnPage() {
       await updateLessonProgress(currentLessonId, { completed: true });
       refetch();
       if (nextLesson) setCurrentLessonId(nextLesson.id);
-    } catch { /* ignore */ }
+    } catch { toast.error("حدث خطأ في تحديث التقدم"); }
     finally { setCompleting(false); }
   };
 
@@ -65,13 +66,34 @@ export default function LearnPage() {
   }
 
   if (!progress) {
-    return <div className="text-center py-12 text-gray-500">لم يتم العثور على بيانات التقدم</div>;
+    return (
+      <div className="text-center py-12">
+        <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+        <p className="text-gray-500 mb-2">لم يتم العثور على بيانات التقدم</p>
+        <p className="text-gray-400 text-sm mb-4">قد تحتاج للتسجيل في الدورة أولاً</p>
+        <a href="/catalog" className="inline-flex px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90">تصفح الدورات</a>
+      </div>
+    );
   }
 
   const courseProgress = progress.enrollment?.progress || 0;
 
+  const completedCount = allLessons.filter(l => l.completed).length;
+
   return (
-    <div className="flex gap-6 min-h-[calc(100vh-180px)]">
+    <div className="space-y-4">
+      {/* Sticky Progress Bar */}
+      <div className="bg-white rounded-xl border border-gray-100 p-4 sticky top-16 z-10">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-sm font-semibold text-gray-800">{progress.course?.titleAr || "الدورة"}</h2>
+          <span className="text-xs text-gray-500">{completedCount} / {allLessons.length} درس</span>
+        </div>
+        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-l from-green-500 to-primary rounded-full transition-all" style={{ width: `${courseProgress}%` }} />
+        </div>
+      </div>
+
+      <div className="flex gap-6 min-h-[calc(100vh-250px)]">
       {/* Sidebar - Course Outline */}
       <div className="w-80 flex-shrink-0 bg-white rounded-xl border border-gray-100 overflow-hidden flex flex-col">
         {/* Progress Header */}
@@ -129,8 +151,28 @@ export default function LearnPage() {
 
               {/* Content based on type */}
               {currentLesson.type === "VIDEO" && (
-                <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center mb-6">
-                  <Play className="w-16 h-16 text-white/50" />
+                <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden mb-6 relative group">
+                  {currentLesson.videoUrl ? (
+                    <iframe src={currentLesson.videoUrl} className="w-full h-full" allowFullScreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" />
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                      <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                        <Play className="w-8 h-8 text-white/70 mr-[-2px]" />
+                      </div>
+                      <p className="text-white/40 text-sm">لم يتم إضافة رابط الفيديو بعد</p>
+                    </div>
+                  )}
+                  {/* Video Controls Bar */}
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-full h-1 bg-white/20 rounded-full mb-2">
+                      <div className="h-full bg-primary rounded-full" style={{ width: currentLesson.completed ? '100%' : '0%' }} />
+                    </div>
+                    <div className="flex items-center justify-between text-white/70 text-xs">
+                      <span>{currentLesson.duration ? `${currentLesson.duration} دقيقة` : ""}</span>
+                      <span>{currentLesson.titleAr}</span>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -181,6 +223,7 @@ export default function LearnPage() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

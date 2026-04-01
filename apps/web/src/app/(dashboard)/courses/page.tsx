@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useCourses, deleteCourse, publishCourse, archiveCourse } from "@/hooks/use-courses";
 import { BookOpen, Plus, Search, Users, Clock, Layers, MoreVertical, Eye, Edit, Trash2, Send, Archive } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 const statusLabels: Record<string, { label: string; class: string }> = {
   DRAFT: { label: "مسودة", class: "bg-amber-100 text-amber-700" },
@@ -23,6 +24,15 @@ export default function CoursesPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [modalityFilter, setModalityFilter] = useState("");
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setActiveMenu(null);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const { data, isLoading, refetch } = useCourses({
     page, limit: 9, search, status: statusFilter, modality: modalityFilter,
@@ -40,7 +50,7 @@ export default function CoursesPage() {
         await archiveCourse(id);
       }
       refetch();
-    } catch { alert("حدث خطأ"); }
+    } catch { toast.error("حدث خطأ"); }
   };
 
   return (
@@ -112,6 +122,9 @@ export default function CoursesPage() {
           <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-600">لا توجد دورات</h3>
           <p className="text-gray-400 mt-1">ابدأ بإنشاء دورة تدريبية جديدة</p>
+          <Link href="/courses/new" className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90">
+            <Plus className="w-4 h-4" /> إنشاء دورة جديدة
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -127,7 +140,7 @@ export default function CoursesPage() {
                     {statusLabels[course.status]?.label || course.status}
                   </span>
                 </div>
-                <div className="absolute top-3 left-3 relative">
+                <div className="absolute top-3 left-3 relative" ref={activeMenu === course.id ? menuRef : undefined}>
                   <button
                     onClick={(e) => { e.preventDefault(); setActiveMenu(activeMenu === course.id ? null : course.id); }}
                     className="p-1.5 bg-white/20 backdrop-blur rounded-lg hover:bg-white/40 transition-colors"

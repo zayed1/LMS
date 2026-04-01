@@ -36,4 +36,8 @@ export class ReportsController {
   @Get('departments')
   @ApiOperation({ summary: 'تقرير الأقسام' })
   departments() { return this.reportsService.getDepartmentReport(); }
+
+  @Get('recent-activities')
+  @ApiOperation({ summary: 'آخر النشاطات' })
+  recentActivities(@Query('limit') limit?: string) { return this.reportsService.getRecentActivities(Number(limit) || 10); }
 }

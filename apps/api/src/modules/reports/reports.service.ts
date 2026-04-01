@@ -137,6 +137,45 @@ export class ReportsService {
     }));
   }
 
+  async getRecentActivities(limit = 10) {
+    // Try audit logs first, fallback to recent enrollments
+    const auditLogs = await this.prisma.auditLog.findMany({
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: { user: { select: { id: true, nameAr: true, nameEn: true } } },
+    });
+
+    if (auditLogs.length > 0) {
+      return auditLogs.map(log => ({
+        id: log.id,
+        user: log.user.nameAr,
+        action: log.action,
+        entity: log.entity,
+        entityId: log.entityId,
+        time: log.createdAt,
+      }));
+    }
+
+    // Fallback: use recent enrollments as activities
+    const enrollments = await this.prisma.enrollment.findMany({
+      take: limit,
+      orderBy: { enrolledAt: 'desc' },
+      include: {
+        user: { select: { nameAr: true } },
+        course: { select: { titleAr: true } },
+      },
+    });
+
+    return enrollments.map(e => ({
+      id: e.id,
+      user: e.user.nameAr,
+      action: e.status === 'COMPLETED' ? 'أكمل دورة' : 'سجل في دورة',
+      entity: 'course',
+      target: e.course.titleAr,
+      time: e.enrolledAt,
+    }));
+  }
+
   async getDepartmentReport() {
     const departments = await this.prisma.department.findMany({
       include: {

@@ -36,9 +36,15 @@ const navItems: NavItem[] = [
   { label: 'الإعدادات', href: '/settings', icon: Settings },
 ];
 
-export function Sidebar() {
+function isRouteActive(pathname: string | null, href: string): boolean {
+  if (!pathname) return false;
+  if (pathname === href) return true;
+  // Match sub-routes like /courses/new or /courses/[id] but NOT /my-courses for /courses
+  return pathname.startsWith(href + '/');
+}
+
+export function Sidebar({ collapsed, onToggleCollapse }: { collapsed: boolean; onToggleCollapse: () => void }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = React.useState(false);
 
   return (
     <aside
@@ -60,7 +66,7 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {navItems.map((item) => {
-          const isActive = pathname?.startsWith(item.href);
+          const isActive = isRouteActive(pathname, item.href);
           const Icon = item.icon;
 
           return (
@@ -84,7 +90,7 @@ export function Sidebar() {
 
       {/* Collapse Toggle */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={onToggleCollapse}
         className="flex h-12 items-center justify-center border-t border-white/10 text-white/70 transition-colors hover:text-white"
       >
         {collapsed ? (

@@ -3,6 +3,8 @@
 import * as React from 'react';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
+import { ToastContainer } from '@/components/ui/toast';
+import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { cn } from '@/lib/utils';
 
 interface DashboardLayoutProps {
@@ -15,7 +17,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-primary-lighter">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(prev => !prev)} />
 
       {/* Main Content Area */}
       <div
@@ -29,9 +31,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Page Content */}
         <main className="p-6">
+          <Breadcrumb />
           {children}
         </main>
       </div>
+      <ToastContainer />
     </div>
   );
 }

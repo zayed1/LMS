@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useDepartments, useDepartmentTree, createDepartment, updateDepartment, deleteDepartment, type Department } from "@/hooks/use-departments";
 import { Plus, Edit, Trash2, ChevronDown, ChevronLeft, Building2, Users, X } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 export default function DepartmentsPage() {
   const { departments, isLoading, refetch } = useDepartments();
@@ -17,7 +18,7 @@ export default function DepartmentsPage() {
       await deleteDepartment(id);
       refetch();
     } catch {
-      alert("لا يمكن حذف قسم يحتوي على مستخدمين");
+      toast.error("لا يمكن حذف قسم يحتوي على مستخدمين");
     }
   };
 

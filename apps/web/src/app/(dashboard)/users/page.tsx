@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUsers, deleteUser, importUsersCSV, type User } from "@/hooks/use-users";
 import { useDepartments } from "@/hooks/use-departments";
 import { UserFormModal } from "@/components/users/user-form-modal";
 import { Search, Plus, Upload, MoreVertical, Edit, Trash2, UserCheck, UserX } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 const roleLabels: Record<string, string> = {
   SUPER_ADMIN: "مدير النظام",
@@ -29,6 +30,33 @@ export default function UsersPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  };
+  const toggleSelectAll = () => {
+    if (!data?.data) return;
+    setSelectedIds(prev => prev.size === data.data.length ? new Set() : new Set(data.data.map(u => u.id)));
+  };
+  const handleBulkDelete = async () => {
+    if (!confirm(`هل أنت متأكد من حذف ${selectedIds.size} مستخدم؟`)) return;
+    try {
+      await Promise.all(Array.from(selectedIds).map(id => deleteUser(id)));
+      toast.success(`تم حذف ${selectedIds.size} مستخدم`);
+      setSelectedIds(new Set());
+      refetch();
+    } catch { toast.error("حدث خطأ أثناء الحذف"); }
+  };
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setActiveMenu(null);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const { data, isLoading, refetch } = useUsers({
     page,
@@ -45,7 +73,7 @@ export default function UsersPage() {
       await deleteUser(id);
       refetch();
     } catch {
-      alert("حدث خطأ أثناء الحذف");
+      toast.error("حدث خطأ أثناء الحذف");
     }
   };
 
@@ -55,9 +83,9 @@ export default function UsersPage() {
     try {
       await importUsersCSV(file);
       refetch();
-      alert("تم استيراد المستخدمين بنجاح");
+      toast.success("تم استيراد المستخدمين بنجاح");
     } catch {
-      alert("حدث خطأ أثناء الاستيراد");
+      toast.error("حدث خطأ أثناء الاستيراد");
     }
     e.target.value = "";
   };
@@ -124,11 +152,32 @@ export default function UsersPage() {
         </div>
       </div>
 
+      {/* Bulk Actions Bar */}
+      {selectedIds.size > 0 && (
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
+          <span className="text-sm text-primary font-medium">تم تحديد {selectedIds.size} مستخدم</span>
+          <div className="flex gap-2">
+            <button onClick={handleBulkDelete}
+              className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600">
+              <Trash2 className="w-3.5 h-3.5" /> حذف المحدد
+            </button>
+            <button onClick={() => setSelectedIds(new Set())}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+              إلغاء التحديد
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
+              <th className="px-4 py-3 w-10">
+                <input type="checkbox" onChange={toggleSelectAll} checked={data?.data ? selectedIds.size === data.data.length && data.data.length > 0 : false}
+                  className="w-4 h-4 text-primary rounded border-gray-300" />
+              </th>
               <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase">المستخدم</th>
               <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase">الدور</th>
               <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase">القسم</th>
@@ -156,7 +205,11 @@ export default function UsersPage() {
               </tr>
             ) : (
               data?.data.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={user.id} className={`transition-colors ${selectedIds.has(user.id) ? "bg-primary/5" : "hover:bg-gray-50"}`}>
+                  <td className="px-4 py-4">
+                    <input type="checkbox" checked={selectedIds.has(user.id)} onChange={() => toggleSelect(user.id)}
+                      className="w-4 h-4 text-primary rounded border-gray-300" />
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -185,7 +238,7 @@ export default function UsersPage() {
                     {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString("ar-SA") : "-"}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="relative">
+                    <div className="relative" ref={activeMenu === user.id ? menuRef : undefined}>
                       <button
                         onClick={() => setActiveMenu(activeMenu === user.id ? null : user.id)}
                         className="p-1 rounded-lg hover:bg-gray-100"
