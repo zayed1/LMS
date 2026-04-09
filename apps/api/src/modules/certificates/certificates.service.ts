@@ -47,6 +47,7 @@ export class CertificatesService {
         templateId,
         certificateNo: certNo,
         grade: dto.grade,
+        pdfUrl: dto.pdfUrl,
         expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
       },
       include: {
@@ -91,6 +92,22 @@ export class CertificatesService {
     });
     if (!cert) throw new NotFoundException('الشهادة غير موجودة');
     return { valid: true, certificate: cert };
+  }
+
+  async getAllCertificates() {
+    return this.prisma.certificate.findMany({
+      include: {
+        user: { select: { id: true, nameAr: true, nameEn: true, email: true } },
+        course: { select: { id: true, titleAr: true, titleEn: true } },
+      },
+      orderBy: { issuedAt: 'desc' },
+    });
+  }
+
+  async deleteCertificate(id: string) {
+    const cert = await this.prisma.certificate.findUnique({ where: { id } });
+    if (!cert) throw new NotFoundException('الشهادة غير موجودة');
+    return this.prisma.certificate.delete({ where: { id } });
   }
 
   async getCourseCertificates(courseId: string) {

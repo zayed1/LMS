@@ -39,6 +39,16 @@ export class CertificatesController {
   @ApiOperation({ summary: 'إصدار شهادة' })
   issue(@Body() dto: IssueCertificateDto) { return this.certificatesService.issueCertificate(dto); }
 
+  @Get('all')
+  @Roles('SUPER_ADMIN', 'ADMIN', 'TRAINING_MANAGER')
+  @ApiOperation({ summary: 'جميع الشهادات' })
+  getAll() { return this.certificatesService.getAllCertificates(); }
+
+  @Delete(':id')
+  @Roles('SUPER_ADMIN', 'ADMIN')
+  @ApiOperation({ summary: 'حذف شهادة' })
+  delete(@Param('id') id: string) { return this.certificatesService.deleteCertificate(id); }
+
   @Get('my')
   @ApiOperation({ summary: 'شهاداتي' })
   my(@CurrentUser() user: any) { return this.certificatesService.getMyCertificates(user.id); }

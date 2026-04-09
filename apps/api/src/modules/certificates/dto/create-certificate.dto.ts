@@ -50,4 +50,9 @@ export class IssueCertificateDto {
   @IsOptional()
   @IsDateString()
   expiresAt?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  pdfUrl?: string;
 }
