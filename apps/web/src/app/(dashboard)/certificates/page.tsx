@@ -115,9 +115,9 @@ export default function CertificatesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {certificates.map(cert => (
-            <div key={cert.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+            <div key={cert.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden card-hover">
               {/* Certificate Header */}
-              <div className="h-32 bg-gradient-to-bl from-primary to-primary-light relative flex items-center justify-center">
+              <div className="h-32 bg-gradient-to-bl from-primary to-primary-light relative flex items-center justify-center cert-shine">
                 <Award className="w-16 h-16 text-white/20" />
                 <div className="absolute bottom-3 right-3">
                   <span className="bg-white/20 backdrop-blur text-white text-xs px-2 py-1 rounded-full" dir="ltr">

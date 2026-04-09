@@ -6,6 +6,7 @@ import { useDepartments } from "@/hooks/use-departments";
 import { UserFormModal } from "@/components/users/user-form-modal";
 import { Search, Plus, Upload, MoreVertical, Edit, Trash2, UserCheck, UserX } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 
 const roleLabels: Record<string, string> = {
   SUPER_ADMIN: "مدير النظام",
@@ -41,7 +42,7 @@ export default function UsersPage() {
     setSelectedIds(prev => prev.size === data.data.length ? new Set() : new Set(data.data.map(u => u.id)));
   };
   const handleBulkDelete = async () => {
-    if (!confirm(`هل أنت متأكد من حذف ${selectedIds.size} مستخدم؟`)) return;
+    if (!await confirmAction({ title: "حذف المستخدمين", message: `سيتم حذف ${selectedIds.size} مستخدم نهائياً. هل أنت متأكد؟` })) return;
     try {
       await Promise.all(Array.from(selectedIds).map(id => deleteUser(id)));
       toast.success(`تم حذف ${selectedIds.size} مستخدم`);
@@ -68,7 +69,7 @@ export default function UsersPage() {
   const { departments } = useDepartments();
 
   const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا المستخدم؟")) return;
+    if (!await confirmAction({ title: "حذف المستخدم", message: "سيتم تعطيل هذا المستخدم. هل أنت متأكد؟" })) return;
     try {
       await deleteUser(id);
       refetch();

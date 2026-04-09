@@ -2,13 +2,13 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, Search, LogOut, User, Settings, CheckCheck, BookOpen, Users as UsersIcon, X } from 'lucide-react';
+import { Bell, Search, LogOut, User, Settings, CheckCheck, BookOpen, Users as UsersIcon, X, Menu } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as Avatar from '@radix-ui/react-avatar';
 import { useAuthStore } from '@/lib/auth';
 import api from '@/lib/api';
 
-export function Header() {
+export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -80,7 +80,14 @@ export function Header() {
   const hasResults = searchResults.courses.length > 0 || searchResults.users.length > 0;
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6">
+      <div className="flex items-center gap-3 flex-1">
+        {/* Mobile menu button */}
+        {onMenuClick && (
+          <button onClick={onMenuClick} className="md:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-500">
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
       {/* Search */}
       <div className="relative w-full max-w-md" ref={searchRef}>
         <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -144,6 +151,7 @@ export function Header() {
         )}
       </div>
 
+      </div>
       <div className="flex items-center gap-4">
         {/* Notifications */}
         <DropdownMenu.Root>

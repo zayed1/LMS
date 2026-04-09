@@ -58,7 +58,7 @@ export default function ReportsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((card) => (
+        {statCards.slice(0, 3).map((card) => (
           <div key={card.title} className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
@@ -72,6 +72,24 @@ export default function ReportsPage() {
             </div>
           </div>
         ))}
+        {/* Donut Chart Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">معدل الإكمال</p>
+              <p className="text-3xl font-bold text-gray-800 mt-1">{stats?.enrollments.completionRate || 0}%</p>
+              <p className="text-xs text-gray-400 mt-1">من إجمالي التسجيلات</p>
+            </div>
+            <div className="w-14 h-14 rounded-full flex items-center justify-center"
+              style={{
+                background: `conic-gradient(#069005 ${(stats?.enrollments.completionRate || 0) * 3.6}deg, #e5e7eb 0deg)`,
+              }}>
+              <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-xs font-bold text-green-600">
+                {stats?.enrollments.completionRate || 0}%
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

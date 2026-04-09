@@ -6,6 +6,7 @@ import { useCourse, publishCourse, archiveCourse, addModule, deleteModule as del
 import api from "@/lib/api";
 import { ArrowRight, Send, Archive, Plus, Edit, Trash2, ChevronDown, ChevronLeft, Play, FileText, Video, BookOpen, X, GripVertical, Users, Clock, Save, Upload, Link2, Eye, PenLine } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 
 const lessonTypes: Record<string, { label: string; icon: any; desc: string }> = {
   TEXT: { label: "نص", icon: FileText, desc: "محتوى نصي تعليمي" },
@@ -74,7 +75,7 @@ export default function CourseDetailPage() {
   };
 
   const handleDeleteModule = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذه الوحدة وجميع دروسها؟")) return;
+    if (!await confirmAction({ title: "حذف الوحدة", message: "سيتم حذف هذه الوحدة وجميع دروسها نهائياً. هل أنت متأكد؟" })) return;
     if (selectedLesson && course?.modules?.find(m => m.id === id)?.lessons?.some(l => l.id === selectedLesson.id)) {
       setSelectedLesson(null);
     }
@@ -82,7 +83,7 @@ export default function CourseDetailPage() {
     refetch();
   };
   const handleDeleteLesson = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا الدرس؟")) return;
+    if (!await confirmAction({ title: "حذف الدرس", message: "سيتم حذف هذا الدرس نهائياً. هل أنت متأكد؟" })) return;
     if (selectedLesson?.id === id) setSelectedLesson(null);
     await delLesson(id);
     refetch();
@@ -212,7 +213,7 @@ export default function CourseDetailPage() {
                         <Plus className="w-3 h-3" /> إضافة درس
                       </button>
                       {showNewLessonPicker === mod.id && (
-                        <div className="absolute bottom-full mb-1 right-2 left-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2 z-20">
+                        <div className="absolute top-full mt-1 right-2 left-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2 z-30">
                           <p className="text-xs text-gray-500 px-2 py-1 font-medium">اختر نوع الدرس</p>
                           {Object.entries(lessonTypes).map(([key, t]) => (
                             <button key={key} onClick={() => handleAddLesson(mod.id, key)}

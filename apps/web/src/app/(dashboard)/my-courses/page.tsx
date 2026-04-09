@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useMyEnrollments } from "@/hooks/use-courses";
-import { BookOpen, Play, CheckCircle, Clock } from "lucide-react";
+import { BookOpen, Play, CheckCircle, Clock, Award } from "lucide-react";
 
 const statusLabels: Record<string, { label: string; class: string }> = {
   ENROLLED: { label: "مسجل", class: "bg-blue-100 text-blue-700" },
@@ -65,14 +65,23 @@ export default function MyCoursesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {enrollments.map(enrollment => (
-            <div key={enrollment.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-              <div className="h-32 bg-gradient-to-bl from-primary to-primary-light relative flex items-center justify-center">
-                <BookOpen className="w-10 h-10 text-white/30" />
+            <div key={enrollment.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden card-hover">
+              <div className={`h-32 relative flex items-center justify-center ${enrollment.status === "COMPLETED" ? "bg-gradient-to-bl from-green-500 to-green-600" : "bg-gradient-to-bl from-primary to-primary-light"}`}>
+                {enrollment.status === "COMPLETED" ? (
+                  <CheckCircle className="w-10 h-10 text-white/30" />
+                ) : (
+                  <BookOpen className="w-10 h-10 text-white/30" />
+                )}
                 <div className="absolute top-3 right-3">
                   <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${statusLabels[enrollment.status]?.class}`}>
                     {statusLabels[enrollment.status]?.label}
                   </span>
                 </div>
+                {enrollment.status === "COMPLETED" && (
+                  <div className="absolute bottom-3 left-3 bg-white/20 backdrop-blur px-2 py-0.5 rounded-full text-white text-xs font-bold">
+                    مكتمل
+                  </div>
+                )}
               </div>
               <div className="p-4">
                 <h3 className="font-semibold text-gray-800 mb-1 line-clamp-2">{enrollment.course.titleAr}</h3>

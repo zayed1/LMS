@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Light Theme Variables ─── */
 :root {
   --color-primary: #0D3269;
   --color-primary-light: #93A3CF;
@@ -11,6 +12,24 @@
   --color-success: #069005;
   --color-danger: #DD1803;
   --color-dark: #0D0002;
+  --bg-body: #F3F3F4;
+  --bg-card: #ffffff;
+  --bg-sidebar: var(--color-primary);
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #f3f4f6;
+}
+
+/* ─── Dark Theme Variables ─── */
+.dark {
+  --color-primary-lighter: #111827;
+  --bg-body: #0f172a;
+  --bg-card: #1e293b;
+  --bg-sidebar: #0f172a;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --color-dark: #f1f5f9;
 }
 
 html {
@@ -19,7 +38,131 @@ html {
 
 body {
   font-family: 'Tajawal', system-ui, sans-serif;
-  background-color: var(--color-primary-lighter);
+  background-color: var(--bg-body);
   color: var(--color-dark);
   min-height: 100vh;
+}
+
+/* ─── Dark Mode Overrides ─── */
+.dark body { background-color: var(--bg-body); }
+.dark .bg-white { background-color: var(--bg-card) !important; }
+.dark .bg-gray-50 { background-color: #1e293b !important; }
+.dark .bg-primary-lighter { background-color: var(--bg-body) !important; }
+.dark .text-gray-800 { color: #f1f5f9 !important; }
+.dark .text-gray-700 { color: #e2e8f0 !important; }
+.dark .text-gray-600 { color: #cbd5e1 !important; }
+.dark .text-gray-500 { color: #94a3b8 !important; }
+.dark .text-gray-400 { color: #64748b !important; }
+.dark .border-gray-200, .dark .border-gray-100 { border-color: #334155 !important; }
+.dark .border-gray-300 { border-color: #475569 !important; }
+.dark .border-gray-50 { border-color: #1e293b !important; }
+.dark .bg-gray-100 { background-color: #334155 !important; }
+.dark .bg-gray-200 { background-color: #475569 !important; }
+.dark .hover\:bg-gray-50:hover { background-color: #334155 !important; }
+.dark .hover\:bg-gray-100:hover { background-color: #475569 !important; }
+.dark input, .dark select, .dark textarea {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+.dark .shadow-sm { box-shadow: 0 1px 3px 0 rgba(0,0,0,.3) !important; }
+
+/* ─── Shimmer Skeleton Animation ─── */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-pulse {
+  animation: none !important;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%) !important;
+  background-size: 200% 100% !important;
+  animation: shimmer 1.5s ease-in-out infinite !important;
+}
+
+.dark .animate-pulse {
+  background: linear-gradient(90deg, #334155 25%, #475569 37%, #334155 63%) !important;
+  background-size: 200% 100% !important;
+  animation: shimmer 1.5s ease-in-out infinite !important;
+}
+
+/* ─── Card Hover Effects ─── */
+@layer utilities {
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+  .card-hover:hover {
+    @apply shadow-lg -translate-y-1;
+  }
+}
+
+/* ─── Page Transition ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-page {
+  animation: fadeInUp 0.25s ease-out;
+}
+
+/* ─── Confetti Animation ─── */
+@keyframes confetti-fall {
+  0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+.confetti-piece {
+  position: fixed;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confetti-fall 3s ease-out forwards;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* ─── Certificate Shine Effect ─── */
+@keyframes cert-shine {
+  0% { left: -150%; }
+  50% { left: 150%; }
+  100% { left: 150%; }
+}
+.cert-shine {
+  position: relative;
+  overflow: hidden;
+}
+.cert-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  animation: cert-shine 4s ease-in-out infinite;
+}
+
+/* ─── Donut Chart ─── */
+.donut-chart {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Mobile Responsive ─── */
+@media (max-width: 768px) {
+  .sidebar-mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 39;
+  }
+}
+
+/* ─── Smooth transitions for interactive elements ─── */
+button, a, input, select, textarea {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }

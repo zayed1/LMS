@@ -237,7 +237,13 @@ function AppearanceTab() {
       <h2 className="text-lg font-semibold text-gray-800">المظهر</h2>
       <div className="grid grid-cols-3 gap-4">
         {themes.map(t => (
-          <button key={t.key} onClick={() => { setTheme(t.key); localStorage.setItem('lms-theme', t.key); toast.success(`تم اختيار المظهر ${t.label}`); }}
+          <button key={t.key} onClick={() => {
+                setTheme(t.key);
+                localStorage.setItem('lms-theme', t.key);
+                const isDark = t.key === 'dark' || (t.key === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark', isDark);
+                toast.success(`تم اختيار المظهر ${t.label}`);
+              }}
             className={`relative p-4 rounded-xl border-2 text-center transition-colors ${
               theme === t.key ? "border-primary bg-primary/5" : "border-gray-200 hover:border-gray-300"
             }`}>

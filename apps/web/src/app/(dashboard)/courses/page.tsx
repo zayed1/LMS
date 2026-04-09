@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCourses, deleteCourse, publishCourse, archiveCourse } from "@/hooks/use-courses";
 import { BookOpen, Plus, Search, Users, Clock, Layers, MoreVertical, Eye, Edit, Trash2, Send, Archive } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 
 const statusLabels: Record<string, { label: string; class: string }> = {
   DRAFT: { label: "مسودة", class: "bg-amber-100 text-amber-700" },
@@ -42,7 +43,7 @@ export default function CoursesPage() {
     setActiveMenu(null);
     try {
       if (action === "delete") {
-        if (!confirm("هل أنت متأكد من حذف هذه الدورة؟")) return;
+        if (!await confirmAction({ title: "حذف الدورة", message: "سيتم حذف هذه الدورة نهائياً. هل أنت متأكد؟" })) return;
         await deleteCourse(id);
       } else if (action === "publish") {
         await publishCourse(id);
@@ -129,7 +130,7 @@ export default function CoursesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {data?.data.map((course) => (
-            <div key={course.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
+            <div key={course.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden card-hover group">
               {/* Thumbnail */}
               <div className="h-40 bg-gradient-to-bl from-primary to-primary-light relative">
                 <div className="absolute inset-0 flex items-center justify-center">

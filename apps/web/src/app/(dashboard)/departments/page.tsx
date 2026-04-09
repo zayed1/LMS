@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useDepartments, useDepartmentTree, createDepartment, updateDepartment, deleteDepartment, type Department } from "@/hooks/use-departments";
 import { Plus, Edit, Trash2, ChevronDown, ChevronLeft, Building2, Users, X } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { confirmAction } from "@/components/ui/confirm-dialog";
 
 export default function DepartmentsPage() {
   const { departments, isLoading, refetch } = useDepartments();
@@ -13,7 +14,7 @@ export default function DepartmentsPage() {
   const [viewMode, setViewMode] = useState<"list" | "tree">("list");
 
   const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من حذف هذا القسم؟")) return;
+    if (!await confirmAction({ title: "حذف القسم", message: "سيتم حذف هذا القسم نهائياً. هل أنت متأكد؟" })) return;
     try {
       await deleteDepartment(id);
       refetch();
