@@ -51,7 +51,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
     searchTimerRef.current = setTimeout(async () => {
       try {
         const [coursesRes, usersRes] = await Promise.allSettled([
-          api.get(`/courses?search=${encodeURIComponent(query)}&limit=5`),
+          api.get(`/courses?search=${encodeURIComponent(query)}&limit=5&status=PUBLISHED`),
           api.get(`/users?search=${encodeURIComponent(query)}&limit=5`),
         ]);
         setSearchResults({
