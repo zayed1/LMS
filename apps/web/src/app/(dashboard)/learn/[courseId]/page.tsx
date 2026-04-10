@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useCourseProgress, updateLessonProgress } from "@/hooks/use-courses";
 import { ChevronDown, ChevronLeft, Check, Play, FileText, Video, BookOpen, ArrowLeft, ArrowRight, Clock, Download, ExternalLink } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { AudioReader } from "@/components/ui/audio-reader";
 
 const typeIcons: Record<string, any> = {
   TEXT: FileText, VIDEO: Video, DOCUMENT: FileText, QUIZ: BookOpen,
@@ -177,18 +178,7 @@ export default function LearnPage() {
               )}
 
               {(currentLesson.type === "TEXT" || currentLesson.type === "QUIZ" || currentLesson.type === "ASSIGNMENT") && currentLesson.content && (
-                <div className="max-w-none text-gray-700 leading-relaxed">
-                  {currentLesson.content.split('\n').map((line: string, i: number) => {
-                    const trimmed = line.trim();
-                    if (!trimmed) return <br key={i} />;
-                    if (trimmed.startsWith('# ')) return <h2 key={i} className="text-xl font-bold text-gray-800 mt-6 mb-3">{trimmed.slice(2)}</h2>;
-                    if (trimmed.startsWith('## ')) return <h3 key={i} className="text-lg font-semibold text-gray-800 mt-4 mb-2">{trimmed.slice(3)}</h3>;
-                    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) return <li key={i} className="mr-4 mb-1">{trimmed.slice(2)}</li>;
-                    if (/^\d+[\.\)]\s/.test(trimmed)) return <li key={i} className="mr-4 mb-1 list-decimal">{trimmed.replace(/^\d+[\.\)]\s/, '')}</li>;
-                    if (trimmed.startsWith('س') && trimmed.includes(':')) return <p key={i} className="font-semibold text-gray-800 mt-4 mb-1">{trimmed}</p>;
-                    return <p key={i} className="mb-2">{trimmed}</p>;
-                  })}
-                </div>
+                <AudioReader content={currentLesson.content} />
               )}
 
               {currentLesson.type === "DOCUMENT" && (
